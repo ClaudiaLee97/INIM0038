@@ -1,429 +1,256 @@
-#organising data
-mutTableAll <- read.table("Desktop/attemptingCAMP/mutTableAll.CSV", header = TRUE, sep=',')
-rage.luad.kras.dr <- data.frame(pat.rage.1[pat.rage.1$SampleID %in% pat.luad,])
-head(mutTableAll)
-#non-driver mut only
-mutTableAll.nondr <- data.frame(mutTableAll[mutTableAll$DriverMut %in% 'FALSE',]) 
-write.csv(mutTableAll.nondr, "Desktop/attemptingCAMP/mutTableAll.nondr.CSV")
-#kras background only
-mutTableAll.dr.kras <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% 'KRAS',])
-sample.dr.kras <- mutTableAll.dr.kras$SampleID
-#48 tsg only
-sgid <- c('ATM', 'NF1', 'PTEN', 'SETD2', 'STK11', 'RNF43',"DNMT3A", "CMTR2", "RBM10", "TSC1", "CDKN2C", "RB1", "STAG2","DOT1L","ATRX", "BAP1",'BRCA2','EP300',"ERCC4","FAT1","KDM6A","KEAP1","KMT2C","LRP1B","NF2","SMAD4","SMARCA4","UBR5","WRN",'ARHGAP35','ARID1A','ARID1B','ARID2','ATF7IP','CDKN2A','CIC','FBXW7','GATA3','KMT2D','LATS1','MGA','NCOA6','NCOR1','POLE','PTPRD','RASA1','TET2', 'TP53')
-nondr.pat <- data.frame(mutTableAll.nondr[mutTableAll.nondr$Hugo_Symbol %in% sgid,])
-nondr.pat.1 <- data.frame(nondr.pat[nondr.pat$SampleID %in% sample.dr.kras,])
-#luad only
-pat.luad <- luad.clin.list$SampleID
-nondr.pat.2 <- data.frame(nondr.pat.1[nondr.pat.1$SampleID %in% pat.luad,])
-write.csv(nondr.pat.2, "Desktop/new/csvs/nondr.muttable.CSV")
-nondr.muttable<- read.table("Desktop/new/csvs/nondr.muttable.CSV", header = TRUE, sep=',')
-#FINAL: luad, kras background+tsg, driver/non-driver
-nondr.pat.3 = nondr.muttable %>%
-  separate_rows(RegionSum,sep=";") %>%
-  separate(RegionSum,into=c("region_id","region_var_ref_count"),sep=":") %>%
-  separate(region_var_ref_count,into=c("var_count","ref_count"),sep="/") %>%
-  mutate(SampleID=gsub("\\.","-",paste(site,SampleID,region_id,sep="_")))
-write.csv(nondr.pat.3, "Desktop/attemptingCAMP/mutTableAll_Region.nondriver.csv")
+##Packages required: bindrcpp, boot, datasets, dplyr, forcats, ggplot2, ggpubr, gplots, graphics, grDevices, magrittr, methods, purrr, readr, rlang, stas, stats4, stringr, survival, survminer, tibble, tidyr, tidyverse, utils, 
 
-#FINAL: luad, kras background, no 48 tsg, driver/non-driver
-mutTableAll <- read.table("Desktop/attemptingCAMP/mutTableAll.CSV", header = TRUE, sep=',')
-mutTableAll.cont.kras.sample <- data.frame(mutTableAll[mutTableAll$Hugo_Symbol %in% 'KRAS',])
-mutTableAll.cont.kras <- data.frame(mutTableAll[mutTableAll$SampleID %in% mutTableAll.cont.kras.sample$SampleID,])
-mutTableAll.cont.kras.luad <- data.frame(mutTableAll.cont.kras[mutTableAll.cont.kras$SampleID %in% pat.luad,])
-'%ni%' <- Negate('%in%')
-mutTableAll.cont.kras.luad.nonsgid <- data.frame(mutTableAll.cont.kras.luad[mutTableAll.cont.kras.luad$Hugo_Symbol %ni% sgid,])
-write.csv(mutTableAll.cont.kras.luad.nonsgid, "Desktop/attemptingCAMP/wildtype.csv")
-mutTableAll.cont.dr <- data.frame(mutTableAll.cont.kras.luad.nonsgid[mutTableAll.cont.kras.luad.nonsgid$DriverMut %in% 'TRUE',]) 
-write.csv(mutTableAll.cont.dr, "Desktop/attemptingCAMP/wildtype.dr.csv")
-mutTableAll.cont.nondr <- data.frame(mutTableAll.cont.kras.luad.nonsgid[mutTableAll.cont.kras.luad.nonsgid$DriverMut %in% 'FALSE',]) 
-write.csv(mutTableAll.cont.nondr, "Desktop/attemptingCAMP/wildtype.nondr.csv")
 
-mutTableAll.cont.nondr = mutTableAll.cont.nondr %>%
-  separate_rows(RegionSum,sep=";") %>%
-  separate(RegionSum,into=c("region_id","region_var_ref_count"),sep=":") %>%
-  separate(region_var_ref_count,into=c("var_count","ref_count"),sep="/") %>%
-  mutate(SampleID=gsub("\\.","-",paste(site,SampleID,region_id,sep="_")))
-write.csv(mutTableAll.cont.nondr, "Desktop/attemptingCAMP/mutTableAll_Region.cont.nondr.csv")
-
-mutTableAll_Region.cont.dr = mutTableAll.cont.dr %>%
-  separate_rows(RegionSum,sep=";") %>%
-  separate(RegionSum,into=c("region_id","region_var_ref_count"),sep=":") %>%
-  separate(region_var_ref_count,into=c("var_count","ref_count"),sep="/") %>%
-  mutate(SampleID=gsub("\\.","-",paste(site,SampleID,region_id,sep="_")))
-write.csv(mutTableAll_Region.cont.dr, "Desktop/attemptingCAMP/mutTableAll_Region.cont.dr.csv")
-
-#organising data
-mutTableAll <- read.table("Desktop/attemptingCAMP/mutTableAll.CSV", header = TRUE, sep=',')
-#driver mut only
-mutTableAll.dr <- data.frame(mutTableAll[mutTableAll$DriverMut %in% 'TRUE',]) 
-write.csv(mutTableAll.dr, "Desktop/attemptingCAMP/mutTableAll.dr.CSV")
-#kras background only
-mutTableAll.dr.kras <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% 'KRAS',])
-sample.dr.kras <- mutTableAll.dr.kras$SampleID
-#RAGE patients
-rage.sgid <- c('ATM', 'NF1', 'PTEN', 'SETD2', 'STK11', 'RNF43')
-pat.rage <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% rage.sgid,])
-pat.rage.1 <- data.frame(pat.rage[pat.rage$SampleID %in% sample.dr.kras,])
-write.csv(pat.rage.1, "Desktop/attemptingCAMP/patient.rage.CSV")
-#CALM patients
-calm.sgid <- c("DNMT3A", "CMTR2", "RBM10", "TSC1", "CDKN2C", "RB1", "STAG2")
-pat.calm <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% calm.sgid,])
-pat.calm.1 <- data.frame(pat.calm[pat.calm$SampleID %in% sample.dr.kras,])
-write.csv(pat.calm.1, "Desktop/attemptingCAMP/patient.calm.CSV")
-#context-dependent patients
-cd.sgid <- c("DOT1L")
-pat.cd <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% cd.sgid,])
-pat.cd.1 <- data.frame(pat.cd[pat.cd$SampleID %in% sample.dr.kras,])
-write.csv(pat.cd.1, "Desktop/attemptingCAMP/patient.cd.CSV")
-#growth attenuator/tumour supressor patients 
-tsg.sgid <- c("ATRX", "BAP1",'BRCA2','EP300',"ERCC4","FAT1","KDM6A","KEAP1","KMT2C","LRP1B","NF2","SMAD4","SMARCA4","UBR5","WRN")
-pat.tsg <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% tsg.sgid,])
-pat.tsg.1 <- data.frame(pat.tsg[pat.tsg$SampleID %in% sample.dr.kras,])
-write.csv(pat.tsg.1, "Desktop/attemptingCAMP/patient.tsg.CSV")
-#no significant effect patients
-nse.sgid <- c('ARHGAP35','ARID1A','ARID1B','ARID2','ATF7IP','CDKN2A','CIC','FBXW7','GATA3','KMT2D','LATS1','MGA','NCOA6','NCOR1','POLE','PTPRD','RASA1','TET2', 'TP53')
-pat.nse <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% nse.sgid,])
-pat.nse.1 <- data.frame(pat.nse[pat.nse$SampleID %in% sample.dr.kras,])
-write.csv(pat.nse.1, "Desktop/attemptingCAMP/patient.nse.CSV")
-#missing ptprd
-
-#luad only
-luad.clin.list <- read.table("Desktop/attemptingCAMP/luad.clin.list.CSV", header = TRUE, sep=',')
-pat.luad <- luad.clin.list$SampleID
-
-rage.luad.kras.dr <- data.frame(pat.rage.1[pat.rage.1$SampleID %in% pat.luad,])
-write.csv(rage.luad.kras.dr, "Desktop/attemptingCAMP/clean.rage.CSV")
-calm.luad.kras.dr <- data.frame(pat.calm.1[pat.calm.1$SampleID %in% pat.luad,])
-write.csv(calm.luad.kras.dr, "Desktop/attemptingCAMP/clean.calm.CSV")
-cd.luad.kras.dr <- data.frame(pat.cd.1[pat.cd.1$SampleID %in% pat.luad,])
-write.csv(cd.luad.kras.dr, "Desktop/attemptingCAMP/clean.cd.SV")
-tsg.luad.kras.dr <- data.frame(pat.tsg.1[pat.tsg.1$SampleID %in% pat.luad,])
-write.csv(tsg.luad.kras.dr, "Desktop/attemptingCAMP/clean.tsg.CSV")
-nse.luad.kras.dr <- data.frame(pat.nse.1[pat.nse.1$SampleID %in% pat.luad,])
-write.csv(nse.luad.kras.dr, "Desktop/attemptingCAMP/clean.nse.CSV")
-clean.all <- rbind(rage.luad.kras.dr,calm.luad.kras.dr,cd.luad.kras.dr,tsg.luad.kras.dr,nse.luad.kras.dr)
-
-write.csv(clean.all, "Desktop/attemptingCAMP/clean.all.CSV")
-#genomic data of samples which contain driver mutations within the 48 genes AND Kras background
-
-#----------------------
-
-#survival correlation
-surv <- as.data.frame(tracerx.surv500)
-write.csv(surv, "Desktop/attemptingCAMP/surv.CSV")
-#patients who have adenocarcinoma, who contain driver mutations within the 48 genes and have Kras background
-surv <- read.csv(file="Desktop/new/csvs/surv.kev.clean.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-SampleID <- data.frame(surv$SampleID)
-os.OS <- data.frame(surv$OS_time_days)
-os <- data.frame(cbind(SampleID,os.OS))
-colnames(os) <- c("SampleID","OS.time.days")
-merged.os <- merge(merged.num,os,by="SampleID")
-merged.os<-merged.os[complete.cases(merged.os),] #removed NAs
-write.csv(merged.os, "Desktop/attemptingCAMP/merged.os.new.CSV") #CORRECT
-
-merged.os.1 <- read.csv(file="Desktop/attemptingCAMP/merged.os.new.CSV", header=TRUE, sep=",", stringsAsFactors = FALSE)
-rage.os <- data.frame(merged.os.1$RAGE, merged.os.1$OS.time.days)
-names(rage.os) <- c("num.mut", "os.days")
-name <- rep("RAGE",95)
-rage.os <- cbind(name,rage.os)
-calm.os <- data.frame(merged.os.1$CALM, merged.os.1$OS.time.days)
-names(calm.os) <- c("num.mut", "os.days")
-name <- rep("CALM",95)
-calm.os <- cbind(name,calm.os)
-cd.os <- data.frame(merged.os.1$CD, merged.os.1$OS.time.days)
-names(cd.os) <- c("num.mut", "os.days")
-name <- rep("Context-dependent",95)
-cd.os <- cbind(name,cd.os)
-tsg.os <- data.frame(merged.os.1$TSG, merged.os.1$OS.time.days)
-names(tsg.os) <- c("num.mut", "os.days")
-name <- rep("Growth attenuating",95)
-tsg.os <- cbind(name,tsg.os)
-nse.os <- data.frame(merged.os.1$NSE, merged.os.1$OS.time.days)
-names(nse.os) <- c("num.mut", "os.days")
-name <- rep("No significant effect",95)
-nse.os <- cbind(name,nse.os)
-os.df <- data.frame(rbind(nse.os,rage.os,calm.os,cd.os,tsg.os))
-write.csv(os.df, "Desktop/new/csvs/os.df.new.csv")
-os.df[os.df == 0] <- NA #change 0 to NA and remove rows
-os.df.na<-os.df[complete.cases(os.df),]
-colnames(os.df.na) <- c("Growth.phenotype", "Num.mutations", "OS.days")
-write.csv(os.df.na, "Desktop/new/csvs/os.df.na.new.csv")
-#manually added in control group!!!
-
-#plotting survival curves
-#overall survival
-os.df.na.new <- read.csv(file="Desktop/new/csvs/os.df.na.new.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-table(os.df.na.new$Growth.phenotype)
-surv.obj <- Surv(time=os.df.na.new$OS.days)
-fit.1 <- survfit(surv.obj~Growth.phenotype, data=os.df.na.new)
-summary(fit.1)
-a<-ggsurvplot(fit.1, data=os.df.na.new, risk.table = TRUE, pval=TRUE)
-a<-ggsurvplot(fit.1, data=os.df.na.new, pval=TRUE)
-a
-ggsave("Desktop/new/comb.surv.eps", dpi=600, width=4, height=20)
-#individual comparison
-os.df.0 <- os.df
-colnames(os.df.0) <- c("Growth.phenotype", "Num.mutations", "OS.days")
-#RAGE vs control
-os.df.rage<-os.df.na.new[os.df.na.new$Growth.phenotype %in% c("RAGE","Control"),]
-os.df.rage$OS.days<-as.numeric(as.character(os.df.rage$OS.days))
-os.df.rage$Growth.phenotype[os.df.rage$Growth.phenotype == "RAGE"] <- "1.RAGE"
-os.df.rage$Growth.phenotype[os.df.rage$Growth.phenotype == "Control"] <- "2.Control"
-surv.obj <- Surv(time=os.df.rage$OS.days)
-fit.1 <- survfit(surv.obj~Growth.phenotype, data=os.df.rage)
-summary(fit.1)
-a<-ggsurvplot(fit.1, data=os.df.rage, risk.table = TRUE, pval=TRUE)
-a
-ggsave("Desktop/attemptingCAMP/surv.rage.pdf", dpi=600)
-#CALM vs control
-os.df.calm<-os.df.na.new[os.df.na.new$Growth.phenotype %in% c("CALM","Control"),]
-os.df.calm$OS.days<-as.numeric(as.character(os.df.calm$OS.days))
-os.df.calm$Growth.phenotype[os.df.calm$Growth.phenotype == "CALM"] <- "1.CALM"
-os.df.calm$Growth.phenotype[os.df.calm$Growth.phenotype == "Control"] <- "2.Control"
-surv.obj <- Surv(time=os.df.calm$OS.days)
-fit.1 <- survfit(surv.obj~Growth.phenotype, data=os.df.calm)
-summary(fit.1)
-a<-ggsurvplot(fit.1, data=os.df.calm, risk.table = TRUE, pval=TRUE)
-a
-ggsave("Desktop/attemptingCAMP/surv.calm.pdf", dpi=600)
-#NSE vs control
-os.df.nse<-os.df.na.new[os.df.na.new$Growth.phenotype %in% c("No significant effect","Control"),]
-os.df.nse$OS.days<-as.numeric(as.character(os.df.nse$OS.days))
-os.df.nse$Growth.phenotype[os.df.nse$Growth.phenotype == "NSE"] <- "1.No significant effect"
-os.df.nse$Growth.phenotype[os.df.nse$Growth.phenotype == "Control"] <- "2.Control"
-surv.obj <- Surv(time=os.df.nse$OS.days)
-fit.1 <- survfit(surv.obj~Growth.phenotype, data=os.df.nse)
-summary(fit.1)
-a<-ggsurvplot(fit.1, data=os.df.nse, risk.table = TRUE, pval=TRUE)
-a
-ggsave("Desktop/attemptingCAMP/surv.prob.nse.new.pdf", dpi=600)
-#CD vs control
-os.df.cd<-os.df.na.new[os.df.na.new$Growth.phenotype %in% c("Context-dependent","Control"),]
-os.df.cd$OS.days<-as.numeric(as.character(os.df.cd$OS.days))
-os.df.cd$Growth.phenotype[os.df.cd$Growth.phenotype == "CD"] <- "1.Context-dependent"
-os.df.cd$Growth.phenotype[os.df.cd$Growth.phenotype == "Control"] <- "2.Control"
-surv.obj <- Surv(time=os.df.cd$OS.days)
-fit.1 <- survfit(surv.obj~Growth.phenotype, data=os.df.cd)
-summary(fit.1)
-a<-ggsurvplot(fit.1, data=os.df.cd, risk.table = TRUE, pval=TRUE)
-a
-ggsave("Desktop/attemptingCAMP/surv.cd.pdf", dpi=600)
-#TSG vs control
-os.df.tsg<-os.df.na.new[os.df.na.new$Growth.phenotype %in% c("Growth attenuating","Control"),]
-os.df.tsg$OS.days<-as.numeric(as.character(os.df.tsg$OS.days))
-os.df.tsg$Growth.phenotype[os.df.tsg$Growth.phenotype == "TSG"] <- "1.Growth attenuating"
-os.df.tsg$Growth.phenotype[os.df.tsg$Growth.phenotype == "Control"] <- "2.Control"
-surv.obj <- Surv(time=os.df.tsg$OS.days)
-fit.1 <- survfit(surv.obj~Growth.phenotype, data=os.df.tsg)
-summary(fit.1)
-a<-ggsurvplot(fit.1, data=os.df.tsg, risk.table = TRUE, pval=TRUE)
-a
-ggsave("Desktop/attemptingCAMP/surv.tsg.pdf", dpi=600)
-
-#plotting coxph 
-os.df.na.new$Growth.phenotype <- factor(os.df.na.new$Growth.phenotype, levels = c("Control","RAGE","CALM","Context-dependent", "Growth attenuating", "No significant effect"))
-os.df.na.new$Growth.phenotype<-as.factor(os.df.na.new$Growth.phenotype)
-fit.coxph <-coxph(formula=Surv(time=os.df.na.new$OS.days)~ Growth.phenotype, os.df.na.new)
-ggforest(fit.coxph, data=os.df.na.new)
-ggsave("Desktop/new/os.coxph.pdf", dpi=600)
-
-#lesion pathology
-surv <- read.csv(file="Desktop/new/csvs/surv.kev.clean.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-SampleID <- data.frame(surv$SampleID)
-lsp.LSP <- data.frame(surv$Lesion1_size_pathology)
-lsp <- data.frame(cbind(SampleID,lsp.LSP))
-colnames(lsp) <- c("SampleID","LesionSize")
-merged.lsp <- merge(merged.num,lsp,by="SampleID")
-merged.lsp<-merged.lsp[complete.cases(merged.lsp),] #removed NAs
-write.csv(merged.lsp, "Desktop/new/csvs/merged.lsp.csv") #CORRECT
-
-merged.lsp.1 <- read.csv(file="Desktop/new/csvs/merged.lsp.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-rage.lsp <- data.frame(merged.lsp.1$RAGE, merged.lsp.1$LesionSize)
-names(rage.lsp) <- c("num.mut", "LesionSize")
-name <- rep("RAGE",99)
-rage.lsp <- cbind(name,rage.lsp)
-calm.lsp <- data.frame(merged.lsp.1$CALM, merged.lsp.1$LesionSize)
-names(calm.lsp) <- c("num.mut", "LesionSize")
-name <- rep("CALM",99)
-calm.lsp <- cbind(name,calm.lsp)
-cd.lsp <- data.frame(merged.lsp.1$CD, merged.lsp.1$LesionSize)
-names(cd.lsp) <- c("num.mut", "LesionSize")
-name <- rep("Context-dependent",99)
-cd.lsp <- cbind(name,cd.lsp)
-tsg.lsp <- data.frame(merged.lsp.1$TSG, merged.lsp.1$LesionSize)
-names(tsg.lsp) <- c("num.mut", "LesionSize")
-name <- rep("Growth attenuator",99)
-tsg.lsp <- cbind(name,tsg.lsp)
-nse.lsp <- data.frame(merged.lsp.1$NSE, merged.lsp.1$LesionSize)
-names(nse.lsp) <- c("num.mut", "LesionSize")
-name <- rep("No significant effect",99)
-nse.lsp <- cbind(name,nse.lsp)
-
-lsp.df <- data.frame(rbind(nse.lsp,rage.lsp,calm.lsp,cd.lsp,tsg.lsp))
-lsp.df[lsp.df == 0] <- NA #change 0 to NA and remove rows
-lsp.df.na<-lsp.df[complete.cases(lsp.df),]
-colnames(lsp.df.na) <- c("Growth.phenotype", "Num.mutations", "LesionSize")
-#calculate tumour volume
-lsp.df.na$TumourVol <- (lsp.df.na$LesionSize)^3/2
-write.csv(lsp.df.na, "Desktop/new/csvs/lsp.csv")
-#manually added in control group!
-lsp.vol <- read.csv(file="Desktop/new/csvs/lsp.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-a <- ggplot()+
-  geom_violin(data=lsp.vol, aes(x=Growth.phenotype, y=TumourVol, color=Growth.phenotype))+
-  scale_y_log10()+
-  labs(title="Correlating tumour growth phenotype to tumour volume", y="Tumour volume", x="Tumour growth phenotype")+
-  theme_classic()
-a
-ggsave("Desktop/new/lsp.violin.pdf", dpi=600, width=10, height=5)
-
-#kptc.ktc.corr
+##Comparing 95th percentile growth rate in KTC and KPTC tumours
+#Read file containing 95th percentile growth rates of KTC and KPTC tumours for each TSG
 kptc.ktc.corr <- read.csv(file="Desktop/attemptingCAMP/kptc.ktc.corr.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-head(kptc.ktc.corr)
+
+#Perform Pearson’s product-moment correlation
 cor.test(kptc.ktc.corr$ktc.mean,kptc.ktc.corr$kptc.mean)
+
+#Plot datapoints and separate context-dependent interactions with lines y=1, x=1
 b <- ggplot(data=kptc.ktc.corr, aes(x=ktc.mean, y=kptc.mean, colour=sgID))+
   geom_point(data=kptc.ktc.corr, aes(x=ktc.mean, y=kptc.mean, colour=sgID))+
-  geom_smooth(data=kptc.ktc.corr,method="lm",colour="black")+
+  #geom_smooth(data=kptc.ktc.corr,method="lm",colour="black")+
   geom_vline(xintercept = 1, aes(linetype="dotted"))+
   geom_hline(yintercept = 1, aes(linetype="dotted"))+
   labs(title="Comparing effect of Tp53 on 95th percentile growth rates\nR=0.8254419,p=5.29e-13", y="KPTC tumour growth rate", x="KTC tumour growth rate")+
   theme_classic()
-b
-ggsave("Desktop/new/kptc.ktc.corr.pdf", height=5, width=10)
 
-#wGII and wFLOH
-mutTableAll_Region = clean.all %>%
-  separate_rows(RegionSum,sep=";") %>%
-  separate(RegionSum,into=c("region_id","region_var_ref_count"),sep=":") %>%
-  separate(region_var_ref_count,into=c("var_count","ref_count"),sep="/") %>%
-  mutate(SampleID=gsub("\\.","-",paste(site,SampleID,region_id,sep="_")))
-mutTableAll_Region.driver<-mutTableAll_Region[mutTableAll_Region$DriverMut %in% TRUE,] #only driver mutations allowed
-write.csv(mutTableAll_Region.driver, "Desktop/attemptingCAMP/mutTableAll_Region.clean.csv")
 
-my.mut <- read.csv(file="Desktop/attemptingCAMP/mutTableAll_Region.clean.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-my.mut.short <- data.frame(cbind(my.mut$SampleID, my.mut$Hugo_Symbol))
-colnames(my.mut.short) <- c("Sample.ID", "Mutation")
-gii.floh <- read.csv(file="Desktop/attemptingCAMP/gii.CSV", header=TRUE, sep=",", stringsAsFactors = FALSE)
-#merged.gii.floh <- merge(gii.floh,my.mut.short,by="Sample.ID")
+##Organisng TRACERx patient data in preparation for correlation analyses
+#Read table containing patient mutation data
+mutTableAll <- read.table("Desktop/attemptingCAMP/mutTableAll.CSV", header = TRUE, sep=',')
 
+#Sift out patients with driver mutations only, and patients with Kras mutations
+mutTableAll.dr <- data.frame(mutTableAll[mutTableAll$DriverMut %in% 'TRUE',])
+mutTableAll.dr.kras <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% 'KRAS',])
+
+#Sift out patients with RAGE mutations 
+rage.sgid <- c('ATM', 'NF1', 'PTEN', 'SETD2', 'STK11', 'RNF43') 
+pat.rage <- data.frame(mutTableAll.dr[mutTableAll.dr$Hugo_Symbol %in% rage.sgid,]) pat.rage.1 <- data.frame(pat.rage[pat.rage$SampleID %in% sample.dr.kras,])
+
+#Repeat above for patients with CALM, Context-dependent, Growth-attenuating and No significant effect mutations 
+
+#Read table containing patient clinical data and sift out lung cancer patients with lung adenocarcinoma (LUAD) only
+luad.clin.list <- read.table("Desktop/attemptingCAMP/luad.clin.list.CSV", header = TRUE, sep=',') 
+pat.luad <- luad.clin.list$SampleID
+
+#Create dataframe of LUAD patients with RAGE mutation and Kras background 
+#rage.luad.kras.dr <- data.frame(pat.rage.1[pat.rage.1$SampleID %in% pat.luad,])
+
+#Repeat above for patients with CALM, Context-dependent, Growth-attenuating and No significant effect mutations
+
+#Create dataframe of mutation data of LUAD patients with Kras background and 48 candidate TSG mutations
+clean.all <- rbind(rage.luad.kras.dr,calm.luad.kras.dr,cd.luad.kras.dr,tsg.luad.kras.dr,nse.luad.kras.dr)
+
+
+##Organising region-specific patient data
+#LUAD patients with driver candidate 48 TSG mutations in Kras-background data separated on a per region basis
+mutTableAll_Region = clean.all %>%   separate_rows(RegionSum,sep=";") %>%   separate(RegionSum,into=c("region_id","region_var_ref_count"),sep=":") %>%   separate(region_var_ref_count,into=c("var_count","ref_count"),sep="/") %>%   mutate(SampleID=gsub("\\.","-",paste(site,SampleID,region_id,sep="_"))) mutTableAll_Region.driver<-mutTableAll_Region[mutTableAll_Region$DriverMut %in% TRUE,]
+
+
+#LUAD patients with driver non-candidate 48 TSG mutations in Kras-background (driver wild-type patients) data separated on a per region basis
+mutTableAll.cont.kras.sample <- data.frame(mutTableAll[mutTableAll$Hugo_Symbol %in% 'KRAS',]) 
+mutTableAll.cont.kras <- data.frame(mutTableAll[mutTableAll$SampleID %in% mutTableAll.cont.kras.sample$SampleID,]) 
+mutTableAll.cont.kras.luad <- data.frame(mutTableAll.cont.kras[mutTableAll.cont.kras$SampleID %in% pat.luad,]) 
+'%ni%' <- Negate('%in%') mutTableAll.cont.kras.luad.nonsgid <- data.frame(mutTableAll.cont.kras.luad[mutTableAll.cont.kras.luad$Hugo_Symbol %ni% sgid,]) 
+mutTableAll.cont.dr <- 
+  data.frame(mutTableAll.cont.kras.luad.nonsgid[mutTableAll.cont.kras.luad.nonsgid$DriverMut %in% 'TRUE',])
+mutTableAll_Region.cont.dr = mutTableAll.cont.dr %>%   separate_rows(RegionSum,sep=";") %>%   separate(RegionSum,into=c("region_id","region_var_ref_count"),sep=":") %>%   separate(region_var_ref_count,into=c("var_count","ref_count"),sep="/") %>%   mutate(SampleID=gsub("\\.","-",paste(site,SampleID,region_id,sep="_")))  
+
+
+## Survival correlation from clinical data
+#Read table containing patient overall survival in days data
+surv <- as.data.frame(tracerx.surv500)
+SampleID <- data.frame(surv$SampleID) 
+os.OS <- data.frame(surv$OS_time_days) 
+os <- data.frame(cbind(SampleID,os.OS)) 
+colnames(os) <- c("SampleID","OS.time.days")
+
+#Sift out survival data of LUAD patients with Kras background and 48 candidate TSG mutations
+merged.os <- merge(merged.num,os,by="SampleID") merged.os<-merged.os[complete.cases(merged.os),]
+
+#Classify survival data of patients based on their assigned growth phenotype
+rage.os <- data.frame(merged.os.1$RAGE, merged.os.1$OS.time.days) 
+names(rage.os) <- c("num.mut", "os.days") 
+name <- rep("RAGE",95)
+rage.os <- cbind(name,rage.os)
+
+#Repeat above for each growth phenotype, to create combined dataframe of survival data for LUAD patients with Kras background sorted by the growth phenotype associated with their TSG mutation 
+
+#Plot survival probability curve and derive risk table 
+table(os.df.na.new$Growth.phenotype) 
+surv.obj <- Surv(time=os.df.na.new$OS.days) 
+fit.1 <- survfit(surv.obj~Growth.phenotype, data=os.df.na.new) summary(fit.1) 
+a<-ggsurvplot(fit.1, data=os.df.na.new, risk.table = TRUE, pval=TRUE)
+
+#Plot cox proportional hazards table 
+os.df.na.new$Growth.phenotype <- factor(os.df.na.new$Growth.phenotype, levels = c("Control","RAGE","CALM","Context-dependent", "Growth attenuating", "No significant effect")) os.df.na.new$Growth.phenotype<-as.factor(os.df.na.new$Growth.phenotype) fit.coxph <-coxph(formula=Surv(time=os.df.na.new$OS.days)~ Growth.phenotype, os.df.na.new) ggforest(fit.coxph, data=os.df.na.new)
+
+
+## Lesion size pathology from clinical data 
+#Read table containing patient lesion size pathology data 
+lsp.LSP <- data.frame(surv$Lesion1_size_pathology) 
+lsp <- data.frame(cbind(SampleID,lsp.LSP)) 
+colnames(lsp) <- c("SampleID","LesionSize")
+
+#Sift out lesion size pathology data of LUAD patients with Kras background and 48 candidate TSG mutations
+merged.lsp <- merge(merged.num,lsp,by="SampleID") 
+merged.lsp<-merged.lsp[complete.cases(merged.lsp),]
+
+#Classify lesion size pathology data of patients based on their assigned growth phenotype
+rage.lsp <- data.frame(merged.lsp.1$RAGE, merged.lsp.1$LesionSize) 
+names(rage.lsp) <- c("num.mut", "LesionSize") 
+name <- rep("RAGE",99) 
+rage.lsp <- cbind(name,rage.lsp)
+
+#Repeat above for each growth phenotype, to create combined dataframe of lesion size pathology data for LUAD patients with Kras background sorted by the growth phenotype associated with their TSG mutation 
+lsp.df <- data.frame(rbind(nse.lsp,rage.lsp,calm.lsp,cd.lsp,tsg.lsp)) 
+lsp.df[lsp.df == 0] <- NA 
+lsp.df.na<-lsp.df[complete.cases(lsp.df),] 
+
+#Calculate tumour volume from lesion size pathology data
+lsp.df.na$TumourVol <- (lsp.df.na$LesionSize)^3/2
+
+#Plot violin plot of tumour volume
+a <- ggplot()+   geom_violin(data=lsp.vol, aes(x=Growth.phenotype, y=TumourVol, color=Growth.phenotype))+   scale_y_log10()+   labs(title="Correlating tumour growth phenotype to tumour volume", y="Tumour volume", x="Tumour growth phenotype")+   theme_classic()
+
+
+##MKI67, Mitosis-HPF and Percentage Necrosis from clinical data
+#Plot boxplot for molecular growth indicators 
+mki67 <- read.csv(file="Desktop/attemptingCAMP/mki67.new.csv", header=TRUE, sep=",", stringsAsFactors = FALSE) a <- ggplot(data=mki67, aes(x=Phenotype, y=MKI67, colour=Phenotype))+   geom_boxplot()+   labs(title="Mki67 RNA expression of LUAD tumours with Kras background and TSG mutations", y="Mki67 RNA expression", x="Growth phenotype")+   stat_summary(fun.y=mean)+   theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
+
+#Repeat above command for Mitosis-HPF and Percentage necrosis 
+
+#Plot heatmap for molecular growth indiactors
+rm(mean) mki67.means <- data.frame(aggregate(MKI67~Phenotype, mki67, mean)) mit.means <- data.frame(aggregate(Mitosis~Phenotype, nec.mit, mean)) nec.means <- data.frame(aggregate(Necrosis~Phenotype, nec.mit, mean)) gen.growth <- cbind(mki67.means,mit.means$Mitosis,nec.means$Necrosis) colnames(gen.growth) <- c("Phenotype", "Mki67", "Mitosis", "Necrosis") rownames(gen.growth) <- gen.growth$Phenotype gen.growth <- gen.growth[,2:4] a <- heatmap(as.matrix(gen.growth), scale="column",               Colv=NA, Rowv=NA,              col=cm.colors(256), xlab="Genomic growth indicators", ylab="TSG mutation", main="Heat map of genomic growth indicators",              margins=c(5,10), cexRow = 1, cexCol = 1)
+
+
+##wGII and wFLOH from genomic instability data 
+#Construct dataframes of non-clonal/clonal driver TSG mutations and wildtype mutations
+my.mut.clonal <- data.frame(my.mut[my.mut$PyCloneClonal %in% c("C"),])
+my.mut.subclonal <- data.frame(my.mut[my.mut$PyCloneClonal %in% c("S"),])
+my.mut.short.clonal <- data.frame(cbind(my.mut.clonal$SampleID, my.mut.clonal$Hugo_Symbol))
+my.mut.short.subclonal <- data.frame(cbind(my.mut.subclonal$SampleID, my.mut.subclonal$Hugo_Symbol))
+colnames(my.mut.short.clonal) <- c("Sample.ID", "Mutation")
+colnames(my.mut.short.subclonal) <- c("Sample.ID", "Mutation")
 mutTableAll_Region.cont.dr <- read.csv(file="Desktop/attemptingCAMP/mutTableAll_Region.cont.dr.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-my.mut.long.0 <- data.frame(cbind(mutTableAll_Region.cont.dr$SampleID,mutTableAll_Region.cont.dr$Hugo_Symbol))
-colnames(my.mut.long.0) <- c("Sample.ID", "Mutation")
-my.mut.long <- data.frame(rbind(my.mut.short,my.mut.long.0))
-merged.gii.floh <- merge(gii.floh,my.mut.long,by="Sample.ID")
+my.mut.long.0.clonal <- data.frame(mutTableAll_Region.cont.dr[mutTableAll_Region.cont.dr$PyCloneClonal %in% c("C"),])
+my.mut.long.0.subclonal <- data.frame(mutTableAll_Region.cont.dr[mutTableAll_Region.cont.dr$PyCloneClonal %in% c("S"),])
+my.mut.long.00.clonal <- data.frame(cbind(my.mut.long.0.clonal$SampleID, my.mut.long.0.clonal$Hugo_Symbol))
+my.mut.long.00.subclonal <- data.frame(cbind(my.mut.long.0.subclonal$SampleID, my.mut.long.0.subclonal$Hugo_Symbol))
+colnames(my.mut.long.00.clonal) <- c("Sample.ID", "Mutation")
+colnames(my.mut.long.00.subclonal) <- c("Sample.ID", "Mutation")
+my.mut.long.clonal <- data.frame(rbind(my.mut.short.clonal,my.mut.long.00.clonal))
+my.mut.long.subclonal <- data.frame(rbind(my.mut.short.subclonal,my.mut.long.00.subclonal))
+merged.gii.floh.clonal <- merge(gii.floh,my.mut.long.clonal,by="Sample.ID")
+merged.gii.floh.subclonal <- merge(gii.floh,my.mut.long.subclonal,by="Sample.ID")
 
-merged.gii.floh$Growth.phenotype<-NA
-merged.gii.floh$Growth.phenotype[merged.gii.floh$Mutation %ni% c(nse.sgid,rage.sgid,calm.sgid,cd.sgid,tsg.sgid)] <- "Clonal Control"
-merged.gii.floh$Growth.phenotype[merged.gii.floh$Mutation %in% rage.sgid] <- "Clonal RAGE"
-merged.gii.floh$Growth.phenotype[merged.gii.floh$Mutation %in% calm.sgid] <- "Clonal CALM"
-merged.gii.floh$Growth.phenotype[merged.gii.floh$Mutation %in% cd.sgid] <- "Clonal Context-dependent"
-merged.gii.floh$Growth.phenotype[merged.gii.floh$Mutation %in% tsg.sgid] <- "Clonal Growth attenuator"
-merged.gii.floh$Growth.phenotype[merged.gii.floh$Mutation %in% nse.sgid] <- "Clonal No significant effect"
-merged.gii.floh<-merged.gii.floh[complete.cases(merged.gii.floh),] #removed NAs
-write.csv(merged.gii.floh,"Desktop/attemptingCAMP/merged.gii.floh.new.csv")
 
-my.mut.nondr <- read.csv(file="Desktop/attemptingCAMP/mutTableAll_Region.nondriver.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-my.mut.short.non.dr <- data.frame(cbind(my.mut.nondr$SampleID, my.mut.nondr$Hugo_Symbol))
-colnames(my.mut.short.non.dr) <- c("Sample.ID", "Mutation")
-my.mut.long.0.non.dr <- read.csv(file="Desktop/attemptingCAMP/mutTableAll_Region.cont.nondr.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-my.mut.long.0.non.dr <- data.frame(cbind(my.mut.long.0.non.dr$SampleID, my.mut.long.0.non.dr$Hugo_Symbol))
-colnames(my.mut.long.0.non.dr) <- c("Sample.ID", "Mutation")
-my.mut.long.non.dr <- rbind(my.mut.long.0.non.dr,my.mut.short.non.dr)
+#Sift out wGII and wFLOH data for sample regions, and sort them into categories based on their clonal/subclonal growth phenotypes 
+merged.gii.floh.clonal$Growth.phenotype<-NA
+merged.gii.floh.clonal$Growth.phenotype[merged.gii.floh.clonal$Mutation %ni% c(nse.sgid,rage.sgid,calm.sgid,cd.sgid,tsg.sgid)] <- "Clonal Control"
+merged.gii.floh.clonal$Growth.phenotype[merged.gii.floh.clonal$Mutation %in% rage.sgid] <- "Clonal RAGE"
+merged.gii.floh.clonal$Growth.phenotype[merged.gii.floh.clonal$Mutation %in% calm.sgid] <- "Clonal CALM"
+merged.gii.floh.clonal$Growth.phenotype[merged.gii.floh.clonal$Mutation %in% cd.sgid] <- "Clonal Context-dependent"
+merged.gii.floh.clonal$Growth.phenotype[merged.gii.floh.clonal$Mutation %in% tsg.sgid] <- "Clonal Growth attenuating"
+merged.gii.floh.clonal$Growth.phenotype[merged.gii.floh.clonal$Mutation %in% nse.sgid] <- "Clonal No significant effect"
+merged.gii.floh.clonal<-merged.gii.floh.clonal[complete.cases(merged.gii.floh.clonal),]
+#Boxplot for wGII scores 
+comb.gii.floh %>%   mutate(Growth.phenotype = fct_relevel(Growth.phenotype, "Clonal Control", "Non-clonal Control", "Clonal RAGE", "Non-clonal RAGE", "Clonal CALM", "Non-clonal CALM", "Clonal Context-dependent", "Non-clonal Context-dependent", "Clonal Growth attenuator", "Non-clonal Growth attenuator","Clonal No significant effect","Non-clonal No significant effect")) %>%   ggplot(aes(x=Growth.phenotype, y=wGII, colour=Growth.phenotype))+   geom_boxplot()+   ggtitle("wGII for LUAD tumours with Kras background and clonal vs non-clonal TSG mutation")+   xlab("Growth phenotype")+   theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
 
-gii.floh <- read.csv(file="Desktop/attemptingCAMP/gii.CSV", header=TRUE, sep=",", stringsAsFactors = FALSE)
-merged.gii.floh.nondr <- merge(gii.floh,my.mut.long.non.dr,by="Sample.ID")
+merged.gii.floh.subclonal$Growth.phenotype<-NA
+merged.gii.floh.subclonal$Growth.phenotype[merged.gii.floh.subclonal$Mutation %ni% c(nse.sgid,rage.sgid,calm.sgid,cd.sgid,tsg.sgid)] <- "Sub-clonal Control"
+merged.gii.floh.subclonal$Growth.phenotype[merged.gii.floh.subclonal$Mutation %in% rage.sgid] <- "Sub-clonal RAGE"
+merged.gii.floh.subclonal$Growth.phenotype[merged.gii.floh.subclonal$Mutation %in% calm.sgid] <- "Sub-clonal CALM"
+merged.gii.floh.subclonal$Growth.phenotype[merged.gii.floh.subclonal$Mutation %in% cd.sgid] <- "Sub-clonal Context-dependent"
+merged.gii.floh.subclonal$Growth.phenotype[merged.gii.floh.subclonal$Mutation %in% tsg.sgid] <- "Sub-clonal Growth attenuating"
+merged.gii.floh.subclonal$Growth.phenotype[merged.gii.floh.subclonal$Mutation %in% nse.sgid] <- "Sub-clonal No significant effect"
+merged.gii.floh.subclonal<-merged.gii.floh.subclonal[complete.cases(merged.gii.floh.subclonal),]
+comb.gii.floh.correct<-rbind(merged.gii.floh.clonal,merged.gii.floh.subclonal)
 
-merged.gii.floh.nondr$Growth.phenotype<-NA
-merged.gii.floh.nondr$Growth.phenotype[merged.gii.floh$Mutation %ni% c(nse.sgid,rage.sgid,calm.sgid,cd.sgid,tsg.sgid)] <- "Non-clonal Control"
-merged.gii.floh.nondr$Growth.phenotype[merged.gii.floh.nondr$Mutation %in% rage.sgid] <- "Non-clonal RAGE"
-merged.gii.floh.nondr$Growth.phenotype[merged.gii.floh.nondr$Mutation %in% calm.sgid] <- "Non-clonal CALM"
-merged.gii.floh.nondr$Growth.phenotype[merged.gii.floh.nondr$Mutation %in% cd.sgid] <- "Non-clonal Context-dependent"
-merged.gii.floh.nondr$Growth.phenotype[merged.gii.floh.nondr$Mutation %in% tsg.sgid] <- "Non-clonal Growth attenuator"
-merged.gii.floh.nondr$Growth.phenotype[merged.gii.floh.nondr$Mutation %in% nse.sgid] <- "Non-clonal No significant effect"
-merged.gii.floh.nondr<-merged.gii.floh.nondr[complete.cases(merged.gii.floh.nondr),] #removed NAs
-
-comb.gii.floh<-rbind(merged.gii.floh.nondr,merged.gii.floh)
-
-comb.gii.floh %>%
-  mutate(Growth.phenotype = fct_relevel(Growth.phenotype, "Clonal Control", "Non-clonal Control", "Clonal RAGE", "Non-clonal RAGE", "Clonal CALM", "Non-clonal CALM", "Clonal Context-dependent", "Non-clonal Context-dependent", "Clonal Growth attenuator", "Non-clonal Growth attenuator","Clonal No significant effect","Non-clonal No significant effect")) %>%
+#plot boxplot for wGII scores
+comb.gii.floh.correct %>%
+  mutate(Growth.phenotype = fct_relevel(Growth.phenotype, "Clonal Control", "Sub-clonal Control", "Clonal RAGE", "Sub-clonal RAGE", "Clonal CALM", "Sub-clonal CALM", "Clonal Context-dependent", "Sub-clonal Context-dependent", "Clonal Growth attenuating", "Sub-clonal Growth attenuating","Clonal No significant effect","Sub-clonal No significant effect")) %>%
   ggplot(aes(x=Growth.phenotype, y=wGII, colour=Growth.phenotype))+
   geom_boxplot()+
   ggtitle("wGII for LUAD tumours with Kras background and clonal vs non-clonal TSG mutation")+
   xlab("Growth phenotype")+
   theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
-ggsave("Desktop/new/wgii.pdf", dpi=600, width = 8, height=5)
 
-comb.gii.floh %>%
-  mutate(Growth.phenotype = fct_relevel(Growth.phenotype, "Clonal Control", "Non-clonal Control", "Clonal RAGE", "Non-clonal RAGE", "Clonal CALM", "Non-clonal CALM", "Clonal Context-dependent", "Non-clonal Context-dependent", "Clonal Growth attenuator", "Non-clonal Growth attenuator","Clonal No significant effect","Non-clonal No significant effect")) %>%
-  ggplot(aes(x=Growth.phenotype, y=wFLOH, colour=Growth.phenotype))+
+#Repeat above commands to plot boxplot for wFLOH scores
+
+#Construct heat map for wGII and wFLOH scores
+wgii.means <- data.frame(aggregate(wGII~Growth.phenotype, comb.gii.floh, mean)) wfloh.means <- data.frame(aggregate(wFLOH~Growth.phenotype, comb.gii.floh, mean)) instability <- merge(wgii.means,wfloh.means, by="Growth.phenotype") colnames(instability) <- c("Phenotype", "wGII", "wFLOH") rownames(instability) <- instability$Phenotype instability <- instability[,2:3] a <- heatmap.2(as.matrix(instability), scale="column", density.info = 'none',              Colv=NA, Rowv=NA,              col=cm.colors(256), xlab="Genomic instability indicators", ylab="TSG mutation", main="Heat map of genomic instability indicators",              margins=c(5,14), cexRow = 1, cexCol = 1)
+
+
+## HLA LOH scores from genomic instability data 
+#Calling HLA LOH was performed on Microsoft Excel. HLA LOH was called in a sample region if HLA allele copy number rounded to 0.
+#Read files of list of regions with 48 TSG mutations and wildtype mutations, and list of regions with HLALOH and without HLALOH 
+hlaloh <- read.csv(file="Desktop/new/hlaloh.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+non.hlaloh <- read.csv(file="Desktop/new/non-hlaloh.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+hlaloh.48 <- read.csv(file="Desktop/new/hlaloh.48.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+hlaloh.wt <- read.csv(file="Desktop/new/hlaloh.wt.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+
+#Create dataframe consisting of regions with 48 TSG mutations and HLALOH, regions with 48 TSG mutations without HLALOH, regions wildtype mutations and HLALOH, regions with wildtype mutations and nonHLALOH
+hlaloh.and.48 <- merge(hlaloh.48,hlaloh,by="Sample.ID") 
+hlaloh.and.48$Growth.phenotype<-NA
+hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% rage.sgid] <- "RAGE"
+hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% calm.sgid] <- "CALM"
+hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% cd.sgid] <- "Context-dependent"
+hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% tsg.sgid] <- "Growth attenuator"
+hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% nse.sgid] <- "No significant effect"
+hlaloh.and.48.count <- table(hlaloh.and.48$Growth.phenotype) 
+nonhlaloh.and.48 <- merge(hlaloh.48,non.hlaloh,by="Sample.ID") 
+nonhlaloh.and.48$Growth.phenotype<-NA
+nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% rage.sgid] <- "RAGE"
+nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% calm.sgid] <- "CALM"
+nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% cd.sgid] <- "Context-dependent"
+nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% tsg.sgid] <- "Growth attenuator"
+nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% nse.sgid] <- "No significant effect"
+nonhlaloh.and.48.count <- table(nonhlaloh.and.48$Growth.phenotype) 
+hlaloh.and.wt <- merge(hlaloh.wt,hlaloh,by="Sample.ID") #wt with LOHHLA #453
+nonhlaloh.and.wt <- merge(hlaloh.wt,non.hlaloh,by="Sample.ID") #wt without LOHHLA #2431
+
+#Perform Fisher’s exact test to test for independence between wildtype/HLALOH, wildtype/non-HLALOH, TSG/HLALOH, TSG/non-HLALOH
+fet.wt <-
+  matrix(c(453, 453, 2431, 2431),
+         nrow = 2,
+         dimnames = list(Phenotype = c("WT", "Wild Type"),
+                         HLALOH = c("HLALOH", "Non-HLALOH")))            
+fisher.test(fet.wt, alternative = "two.sided")
+
+
+## Immunology scores from immunology data
+#Load immunology dataset, list of patient with Kras+48TSGs, and list of wild-type patients 
+imm <- read.csv(file="Desktop/attemptingCAMP/immune.subsets.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+my.mut.short.edited <- read.csv(file="Desktop/attemptingCAMP/my.mut.short.edited.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+my.mut.short.cont <- read.csv(file="Desktop/attemptingCAMP/mutTableAll_Region.cont.dr.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+
+#Create dataframe of immunology scores sorted into growth phenotypes and control groups
+merged.imm <- merge(imm,my.mut.short.edited,by="Sample.ID")
+merged.imm$Growth.phenotype<-NA
+merged.imm$Growth.phenotype[merged.imm$Mutation %in% rage.sgid] <- "RAGE"
+merged.imm$Growth.phenotype[merged.imm$Mutation %in% calm.sgid] <- "CALM"
+merged.imm$Growth.phenotype[merged.imm$Mutation %in% cd.sgid] <- "Context-dependent"
+merged.imm$Growth.phenotype[merged.imm$Mutation %in% tsg.sgid] <- "Growth attenuator"
+merged.imm$Growth.phenotype[merged.imm$Mutation %in% nse.sgid] <- "No significant effect"
+merged.imm<-merged.imm[complete.cases(merged.imm),] 
+merged.imm.cont <- merge(imm,my.mut.short.cont,by="Sample.ID")
+merged.imm.cont$Growth.phenotype <- "Control"
+comb.imm<-rbind(merged.imm,merged.imm.cont)
+
+#Plot boxplot for immunology scores
+imm.plot <- ggplot(merged.imm, aes(x=Growth.phenotype, y=treg.score.danaher, colour=Growth.phenotype))+ 
   geom_boxplot()+
-  ggtitle("wFLOH for LUAD tumours with Kras background and clonal vs non-clonal TSG mutation")+
-  xlab("Growth phenotype")+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
-ggsave("Desktop/new/wfloh.pdf", dpi=600, width = 8, height=5)
+  ggtitle("Treg score of patient samples with particular driver mutations")+
+  ylab("Treg score")+
+  xlab("Growth phenotype")
 
-#heat map for genomic instability indicators
-wgii.means <- data.frame(aggregate(wGII~Growth.phenotype, comb.gii.floh, mean))
-wfloh.means <- data.frame(aggregate(wFLOH~Growth.phenotype, comb.gii.floh, mean))
-instability <- merge(wgii.means,wfloh.means, by="Growth.phenotype")
-colnames(instability) <- c("Phenotype", "wGII", "wFLOH")
-rownames(instability) <- instability$Phenotype
-instability <- instability[,2:3]
-a <- heatmap.2(as.matrix(instability), scale="column", density.info = 'none',
-             Colv=NA, Rowv=NA,
-             col=cm.colors(256), xlab="Genomic instability indicators", ylab="TSG mutation", main="Heat map of genomic instability indicators",
-             margins=c(5,14), cexRow = 1, cexCol = 1)
-a
+#Repeat above command for CD8, CD4, CD45, B-cell, T-cell, Th1, and TIL scores
 
-#mki67, necrosis, mit-hpf
-mki67 <- read.csv(file="Desktop/attemptingCAMP/mki67.new.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-a <- ggplot(data=mki67, aes(x=Phenotype, y=MKI67, colour=Phenotype))+
-  geom_boxplot()+
-  labs(title="Mki67 RNA expression of LUAD tumours with Kras background and TSG mutations", y="Mki67 RNA expression", x="Growth phenotype")+
-  stat_summary(fun.y=mean)+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
-a
-ggsave("Desktop/new/mki67.pdf", height=5, width=10)
-
-nec.mit<- read.csv(file="Desktop/attemptingCAMP/nec_mit_data_manual.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-a <- ggplot(data=nec.mit, aes(x=Phenotype, y=Mitosis, colour=Phenotype))+
-  geom_boxplot()+
-  labs(title="Mitosis-HPF of Kras-background LUAD  tumours with Kras background and TSG mutations", y="Mitoses-HPF", x="Growth phenotype")+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
-a
-ggsave("Desktop/new/mit-hpf.pdf", height=5, width=10)
-
-a <- ggplot(data=nec.mit, aes(x=Phenotype, y=Necrosis, colour=Phenotype))+
-  geom_boxplot()+
-  labs(title="Percentage necrosis of Kras-background LUAD  tumours with Kras background and TSG mutations", y="Percentage necrosis", x="Growth phenotype")+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
-a
-ggsave("Desktop/new/nec.pdf", height=5, width=10)
-
-#heat map for genomic growth indicators
-rm(mean)
-mki67.means <- data.frame(aggregate(MKI67~Phenotype, mki67, mean))
-mit.means <- data.frame(aggregate(Mitosis~Phenotype, nec.mit, mean))
-nec.means <- data.frame(aggregate(Necrosis~Phenotype, nec.mit, mean))
-gen.growth <- cbind(mki67.means,mit.means$Mitosis,nec.means$Necrosis)
-colnames(gen.growth) <- c("Phenotype", "Mki67", "Mitosis", "Necrosis")
-rownames(gen.growth) <- gen.growth$Phenotype
-gen.growth <- gen.growth[,2:4]
-a <- heatmap(as.matrix(gen.growth), scale="column", 
-             Colv=NA, Rowv=NA,
-             col=cm.colors(256), xlab="Genomic growth indicators", ylab="TSG mutation", main="Heat map of genomic growth indicators",
-             margins=c(5,10), cexRow = 1, cexCol = 1)
-
-#immunology
-comb.imm <- read.csv(file="Desktop/attemptingCAMP/comb.imm.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-#plot cd8,cd4,b-cell,cd45,t-cell,th1,til,treg scores
-imm.plot <- ggplot(comb.imm, aes(x=Growth.phenotype, y=cd45.score.danaher, colour=Growth.phenotype))+ 
-  geom_boxplot()+
-  ggtitle("CD45 score of LUAD tumours with Kras background and tumour suppressor mutations")+
-  ylab("CD45 score")+xlab("Growth phenotype")+theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
-imm.plot
-ggsave("Desktop/new/imm.til.pdf", dpi=600,width=10,height=5)
-
-is.numeric(comb.imm)
+#Find mean of immunology scores and plot normalised heat map
 cd8.means <- data.frame(aggregate(cd8.score.danaher~Growth.phenotype, comb.imm, mean))
 cd4.means <- data.frame(aggregate(cd4.score.danaher~Growth.phenotype, comb.imm, mean))
 cd45.means <- data.frame(aggregate(cd45.score.danaher~Growth.phenotype, comb.imm, mean))
@@ -434,24 +261,28 @@ til.means <- data.frame(aggregate(total.til.score.danahaer~Growth.phenotype, com
 treg.means <- data.frame(aggregate(treg.score.danaher~Growth.phenotype, comb.imm, mean))
 
 imm.hm <- cbind(cd8.means,cd4.means$cd4.score.danaher,cd8.means$cd8.score.danaher,cd45.means$cd45.score.danaher,bcell.means$bcell.score.danaher,tcell.means$tcells.score.danaher,th1.means$th1.score.danaher,til.means$total.til.score.danahaer,treg.means$treg.score.danaher)
-colnames(imm.hm) <- c("Phenotype", "CD8 score", "CD4 score", "CD45 score", "B-cell score", "T-cell score", "Th1 score", "Total TIL score", "Treg Score")
+colnames(imm.hm) <- c("Phenotype", "CD8 score", "CD4 score", "CD45 score", "B-cell score", "T-cell score", "Th1 score", "Total TIL score", "T-reg Score")
 rownames(imm.hm) <- imm.hm$Phenotype
-imm.hm <- imm.hm[,2:8]
+imm.hm <- imm.hm[,2:9]
 a <- heatmap(as.matrix(imm.hm), scale="column", 
              Colv=NA, Rowv=NA,
-             col=cm.colors(256), xlab="Immunology scores", ylab="TSG mutation", main="Heat map of immunology scores",
+             col=cm.colors(256), xlab="Immunology scores", ylab="Growth phenotype",
              margins=c(6,10), cexRow = 1, cexCol = 0.7)
 
-#wnt signalling
-#motifs: FZR1,LRP5,LRP6,AXIN1,AXIN2,APC,GSK3A,GSK3B,BCAT1,BCAT2,LEF1,BCL9
+
+## Wnt signalling scores from RNASeq data 
+#Read list of RNASeq patient IDs and their growth phenotype
 rnaseq.list <- read.csv(file="Desktop/new/rnaseq.list.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+
+#Construct curated dataframe of selected Wnt genes 
 rnaseq.all <- read.csv(file="Desktop/attemptingCAMP/rna.seq.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
 rnaseq.curated <- data.frame(cbind(rnaseq.all$SampleID, rnaseq.all$FZR1, rnaseq.all$LRP5, rnaseq.all$LRP6, rnaseq.all$AXIN1, rnaseq.all$AXIN2, rnaseq.all$APC, rnaseq.all$GSK3A, rnaseq.all$GSK3B, rnaseq.all$BCAT1, rnaseq.all$BCAT2, rnaseq.all$LEF1, rnaseq.all$BCL9))
 colnames(rnaseq.curated) <- c("SampleID", "FZR1","LRP5","LRP6","AXIN1","AXIN2","APC","GSK3A","GSK3B","BCAT1","BCAT2","LEF1","BCL9")
-rnaseq.comb <- merge(rnaseq.list,rnaseq.curated,by='SampleID')
-write.csv(rnaseq.comb,"Desktop/new/csvs/rnaseq.comb.csv")
 
-rnaseq.comb.1 <- read.csv(file="Desktop/new/csvs/rnaseq.comb.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+#Create dataframe of RNASeq patients and their Wnt gene expressions 
+rnaseq.comb <- merge(rnaseq.list,rnaseq.curated,by='SampleID')
+
+#Find mean of Wnt RNA expression for each growth phenotype group and plot normalised heat map
 FZR1.means <- data.frame(aggregate(FZR1~Phenotype, rnaseq.comb.1, mean))
 LRP5.means <- data.frame(aggregate(LRP5~Phenotype, rnaseq.comb.1, mean))
 LRP6.means <- data.frame(aggregate(LRP6~Phenotype, rnaseq.comb.1, mean))
@@ -464,141 +295,11 @@ BCAT1.means <- data.frame(aggregate(BCAT1~Phenotype, rnaseq.comb.1, mean))
 BCAT2.means <- data.frame(aggregate(BCAT2~Phenotype, rnaseq.comb.1, mean))
 LEF1.means <- data.frame(aggregate(LEF1~Phenotype, rnaseq.comb.1, mean))
 BCL9.means <- data.frame(aggregate(BCL9~Phenotype, rnaseq.comb.1, mean))
-
 wnt.hm <- cbind(FZR1.means,LRP5.means$LRP5,LRP6.means$LRP6,AXIN1.means$AXIN1,AXIN2.means$AXIN2,APC.means$APC,GSK3A.means$GSK3A,GSK3B.means$GSK3B,BCAT1.means$BCAT1,BCAT2.means$BCAT2,LEF1.means$LEF1,BCL9.means$BCL9)
 colnames(wnt.hm) <- c("Phenotype", "FZR1","LRP5","LRP6","AXIN1","AXIN2","APC","GSK3A","GSK3B","BCAT1","BCAT2","LEF1","BCL9")
 rownames(wnt.hm) <- wnt.hm$Phenotype
 wnt.hm <- wnt.hm[,2:13]
 a <- heatmap(as.matrix(wnt.hm), scale="column", 
              Colv=NA, Rowv=NA,
-             col=cm.colors(256), xlab="Wnt pathway molecular signatures", ylab="Growth phenotype", main="Heat map of Wnt pathway molecular signatures (RNA Seq)",
+             col=cm.colors(256), xlab="Wnt pathway molecular signatures", ylab="Growth phenotype", 
              margins=c(6,12), cexRow = 1, cexCol = 1)
-
-#hlaloh
-hlaloh <- read.csv(file="Desktop/new/hlaloh.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-non.hlaloh <- read.csv(file="Desktop/new/non-hlaloh.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-hlaloh.48 <- read.csv(file="Desktop/new/hlaloh.48.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-hlaloh.wt <- read.csv(file="Desktop/new/hlaloh.wt.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-
-hlaloh.and.48 <- merge(hlaloh.48,hlaloh,by="Sample.ID") #ts with LOHHLA
-hlaloh.and.48$Growth.phenotype<-NA
-hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% rage.sgid] <- "RAGE"
-hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% calm.sgid] <- "CALM"
-hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% cd.sgid] <- "Context-dependent"
-hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% tsg.sgid] <- "Growth attenuator"
-hlaloh.and.48$Growth.phenotype[hlaloh.and.48$Mutation %in% nse.sgid] <- "No significant effect"
-hlaloh.and.48.count <- table(hlaloh.and.48$Growth.phenotype) #ts with LOHHLA
-
-nonhlaloh.and.48 <- merge(hlaloh.48,non.hlaloh,by="Sample.ID") #ts without LOHHLA
-nonhlaloh.and.48$Growth.phenotype<-NA
-nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% rage.sgid] <- "RAGE"
-nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% calm.sgid] <- "CALM"
-nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% cd.sgid] <- "Context-dependent"
-nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% tsg.sgid] <- "Growth attenuator"
-nonhlaloh.and.48$Growth.phenotype[nonhlaloh.and.48$Mutation %in% nse.sgid] <- "No significant effect"
-nonhlaloh.and.48.count <- table(nonhlaloh.and.48$Growth.phenotype) #ts without LOHHLA
-
-hlaloh.and.wt <- merge(hlaloh.wt,hlaloh,by="Sample.ID") #wt with LOHHLA #453
-nonhlaloh.and.wt <- merge(hlaloh.wt,non.hlaloh,by="Sample.ID") #wt without LOHHLA #2431
-
-hlaloh.comb <- read.csv(file="Desktop/new/hlaloh.comb.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-
-fet.wt <-
-  matrix(c(453, 453, 2431, 2431),
-         nrow = 2,
-         dimnames = list(Phenotype = c("WT", "Wild Type"),
-                         HLALOH = c("HLALOH", "Non-HLALOH")))            
-fisher.test(fet.wt, alternative = "two.sided")
-
-
-#pycloneCCF
-mutTableAll_Region.clean <- read.csv(file="Desktop/attemptingCAMP/mutTableAll_Region.clean.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-pyclone.dr = mutTableAll_Region.clean %>%
-  separate_rows(PyCloneCCF,sep=";") %>%
-  separate(PyCloneCCF,into=c("region_id","pycloneccf"),sep=":") 
-write.csv(pyclone.dr, "Desktop/new/pycloneccf.dr.csv")
-pyclone.dr <- read.csv(file="Desktop/new/pycloneccf.dr.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-pyclone.dr.cur <- data.frame(cbind(pyclone.dr$SampleID,pyclone.dr$Hugo_Symbol,pyclone.dr$pycloneccf))
-
-pyclone.cont.dr = mutTableAll_Region.cont.dr %>%
-  separate_rows(PyCloneCCF,sep=";") %>%
-  separate(PyCloneCCF,into=c("region_id","pycloneccf"),sep=":") 
-write.csv(pyclone.cont.dr, "Desktop/new/pycloneccf.cont.dr.csv")
-pyclone.cont.dr <- read.csv(file="Desktop/new/pycloneccf.cont.dr.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-pyclone.cont.dr.cur <- data.frame(cbind(pyclone.cont.dr$SampleID,pyclone.cont.dr$Hugo_Symbol,pyclone.cont.dr$pycloneccf))
-
-pyclone.dr.comb <- data.frame(rbind(pyclone.cont.dr.cur,pyclone.dr.cur))
-colnames(pyclone.dr.comb) <- c("Sample ID", "Hugo_Symbol", "pycloneccf")
-write.csv(pyclone.dr.comb, "Desktop/new/pycloneccf.dr.comb.csv")
-pyclone.dr.comb <- read.csv(file="Desktop/new/pycloneccf.dr.comb.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-
-pyclone.dr.comb$Growth.phenotype<-NA
-pyclone.dr.comb$Growth.phenotype[pyclone.dr.comb$Hugo_Symbol %ni% c(rage.sgid,calm.sgid,cd.sgid,tsg.sgid,nse.sgid)] <- "Clonal Control"
-pyclone.dr.comb$Growth.phenotype[pyclone.dr.comb$Hugo_Symbol %in% rage.sgid] <- "Clonal RAGE"
-pyclone.dr.comb$Growth.phenotype[pyclone.dr.comb$Hugo_Symbol %in% calm.sgid] <- "Clonal CALM"
-pyclone.dr.comb$Growth.phenotype[pyclone.dr.comb$Hugo_Symbol %in% cd.sgid] <- "Clonal Context-dependent"
-pyclone.dr.comb$Growth.phenotype[pyclone.dr.comb$Hugo_Symbol %in% tsg.sgid] <- "Clonal Growth attenuator"
-pyclone.dr.comb$Growth.phenotype[pyclone.dr.comb$Hugo_Symbol %in% nse.sgid] <- "Clonal No significant effect"
-pyclone.dr.means <- data.frame(aggregate(pycloneccf~Growth.phenotype, pyclone.dr.comb, mean))
-pyclone.dr.var <- data.frame(aggregate(pycloneccf~Growth.phenotype, pyclone.dr.comb, var))
-
-mutTableAll_Region.nondriver <- read.csv(file="Desktop/attemptingCAMP/mutTableAll_Region.nondriver.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-pyclone.nondr = mutTableAll_Region.nondriver %>%
-  separate_rows(PyCloneCCF,sep=";") %>%
-  separate(PyCloneCCF,into=c("region_id","pycloneccf"),sep=":") 
-write.csv(pyclone.nondr, "Desktop/new/pycloneccf.nondr.csv")
-pyclone.nondr.cur <- data.frame(cbind(pyclone.nondr$SampleID,pyclone.nondr$Hugo_Symbol,pyclone.nondr$pycloneccf))
-
-mutTableAll_Region.cont.nondr <- read.csv(file="Desktop/attemptingCAMP/mutTableAll_Region.cont.nondr.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-pyclone.cont.nondr = mutTableAll_Region.cont.nondr %>%
-  separate_rows(PyCloneCCF,sep=";") %>%
-  separate(PyCloneCCF,into=c("region_id","pycloneccf"),sep=":") 
-write.csv(pyclone.cont.nondr, "Desktop/new/pycloneccf.cont.nondr.csv")
-pyclone.cont.nondr <- read.csv(file="Desktop/new/pycloneccf.cont.nondr.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-pyclone.cont.nondr.cur <- data.frame(cbind(pyclone.cont.nondr$SampleID,pyclone.cont.nondr$Hugo_Symbol,pyclone.cont.nondr$pycloneccf))
-
-pyclone.nondr.comb <- rbind(pyclone.nondr.cur,pyclone.cont.nondr.cur)
-colnames(pyclone.nondr.comb) <- c("Sample ID", "Hugo_Symbol", "pycloneccf")
-write.csv(pyclone.nondr.comb, "Desktop/new/pycloneccf.nondr.comb.csv")
-pyclone.nondr.comb <- read.csv(file="Desktop/new/pycloneccf.nondr.comb.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-
-pyclone.nondr.comb$Growth.phenotype<-NA
-pyclone.nondr.comb$Growth.phenotype[pyclone.nondr.comb$Hugo_Symbol %ni% c(rage.sgid,calm.sgid,cd.sgid,tsg.sgid,nse.sgid)] <- "Non-clonal Control"
-pyclone.nondr.comb$Growth.phenotype[pyclone.nondr.comb$Hugo_Symbol %in% rage.sgid] <- "Non-clonal RAGE"
-pyclone.nondr.comb$Growth.phenotype[pyclone.nondr.comb$Hugo_Symbol %in% calm.sgid] <- "Non-clonal CALM"
-pyclone.nondr.comb$Growth.phenotype[pyclone.nondr.comb$Hugo_Symbol %in% cd.sgid] <- "Non-clonal Context-dependent"
-pyclone.nondr.comb$Growth.phenotype[pyclone.nondr.comb$Hugo_Symbol %in% tsg.sgid] <- "Non-clonal Growth attenuator"
-pyclone.nondr.comb$Growth.phenotype[pyclone.nondr.comb$Hugo_Symbol %in% nse.sgid] <- "Non-clonal No significant effect"
-pyclone.nondr.means <- data.frame(aggregate(pycloneccf~Growth.phenotype, pyclone.nondr.comb, mean))
-pyclone.nondr.var <- data.frame(aggregate(pycloneccf~Growth.phenotype, pyclone.nondr.comb, var))
-
-#pyclone boxplot
-pycloneccf.comb <- rbind(pyclone.nondr.comb,pyclone.dr.comb)
-pycloneccf.comb %>%
-  mutate(Growth.phenotype = fct_relevel(Growth.phenotype, "Clonal Control", "Non-clonal Control", "Clonal RAGE", "Non-clonal RAGE", "Clonal CALM", "Non-clonal CALM", "Clonal Context-dependent", "Non-clonal Context-dependent", "Clonal Growth attenuator", "Non-clonal Growth attenuator","Clonal No significant effect","Non-clonal No significant effect")) %>%
-  ggplot(aes(x=Growth.phenotype, y=pycloneccf, color=Growth.phenotype))+
-  geom_boxplot()+
-  labs(title="PyCloneCCF of LUAD  tumours with Kras background and clonal vs non-clonal TSG mutations", y="PyCloneCCF", x="Growth phenotype")+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
-ggsave("Desktop/new/pycloneccf.pdf", dpi=600, width = 8, height=5)
-
-#need at least 2 rows for heatmap but only have 1 pycloneccf row
-pycloneccf.hm <- rbind(pyclone.nondr.means,pyclone.dr.means)
-colnames(pycloneccf.hm) <- "PyCloneCCF"
-rownames(pycloneccf.hm) <- pycloneccf.hm$Growth.phenotype
-pycloneccf.hm <- pycloneccf.hm[,2]
-a <- heatmap(as.matrix(pycloneccf.hm), scale="column", 
-             Colv=NA, Rowv=NA,
-             col=cm.colors(256), xlab="PyCloneCCF", ylab="Growth phenotype", main="Heat map of PyCloneCCF for LUAD tumours with Kras background and clonal vs non-clonal TSG mutations",
-             margins=c(6,12), cexRow = 1, cexCol = 1)
-
-pyclone.comb.mean.std <- read.csv(file="Desktop/new/pycloneccf.comb.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
-pyclone.comb.mean.std %>%
-  mutate(Phenotype = fct_relevel(Phenotype, "Clonal RAGE", "Non-clonal RAGE", "Clonal CALM", "Non-clonal CALM", "Clonal Context-dependent", "Non-clonal Context-dependent", "Clonal Growth attenuator", "Non-clonal Growth attenuator","Clonal No significant effect","Non-clonal No significant effect")) %>%
-  ggplot(aes(x=Phenotype, y=pycloneccf, color=Phenotype))+
-  geom_boxplot()+
-  geom_errorbar(aes(ymin=pyclone.comb.mean.std$std.low, ymax=pyclone.comb.mean.std$std.up, width=0.2))+
-  labs(title="PyCloneCCF of LUAD  tumours with Kras background and clonal vs non-clonal TSG mutations", y="PyCloneCCF", x="Growth phenotype")+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'none')
-ggsave("Desktop/new/pycloneccf.mean.var.pdf", dpi=600, width = 8, height=5)
-
